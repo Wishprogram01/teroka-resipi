@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teroka Resipi</title>
+    <style>
+        :root {
+            --bg-color: #f9f9f9;
+            --text-color: #333;
+            --card-color: #fff;
+            --button-color: #28a745;
+            --link-color: #007bff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #f9f9f9;
+            --card-color: #1e1e1e;
+            --button-color: #007bff;
+            --link-color: #00bfff;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: Arial;
+            padding: 20px;
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        input {
+            padding: 10px;
+            width: 80%;
+            max-width: 300px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--button-color);
+        }
+
+        button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            background-color: var(--button-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .resipi {
+            background: var(--card-color);
+            padding: 15px;
+            margin: 15px;
+            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: inline-block;
+            vertical-align: top;
+            text-align: center;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .resipi:hover {
+            transform: scale(1.03);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+
+        img:hover {
+            transform: scale(1.05);
+        }
+
+        h2 {
+            margin-top: 50px;
+        }
+
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--button-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 600px) {
+            .resipi {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🍳 Teroka Resipi</h1>
+
+    <button onclick="toggleTheme()">🌗 Tukar Tema</button>
+    <button onclick="randomResipi()">🎲 Random Recipe</button>
+
+    <!-- Search Section -->
+    <h2>🔍 Cari Resipi Anda</h2>
+    <input type="text" id="carian" placeholder="Nak masak apa hari ini?">
+    <button onclick="cariResipi()">Cari</button>
+
+    <div class="spinner" id="loading"></div>
+    <div id="hasil"></div>
+    <div id="lihatLagiContainer"></div>
+
+    <!-- Carian Popular -->
+    <h2>🔥 Carian Popular Hari Ini</h2>
+    <div id="popular"></div>
+
+    <script>
+        let currentIndex = 0;
+        let currentData = [];
+
+        // Theme Toggle
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", newTheme);
+        }
+
+        // Loading Animation
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Carian Popular
+        const popularList = ['Nasi lemak', 'Cheesecake', 'Fried rice', 'Burger', 'Chicken curry'];
+
+        popularList.forEach(makanan => {
+            const pautan = `https://www.themealdb.com/api/json/v1/1/search.php?s=${makanan}`;
+
+            fetch(pautan)
+                .then(res => res.json())
+                .then(data => {
+                    const popular = document.getElementById('popular');
+
+                    if (data.meals) {
+                        const limit = data.meals.slice(0, 2);
+                        limit.forEach(meal => {
+                            const resipi = document.createElement('div');
+                            resipi.className = 'resipi';
+                            resipi.innerHTML = `
+                                <h3>${meal.strMeal}</h3>
+                                <img src="${meal.strMealThumb}" alt="${meal.strMeal}">
+                                <br><br>
+                                <a href="${meal.strYoutube}" target="_blank">▶️ Tonton Cara Masak</a>
+                            `;
+                            popular.appendChild(resipi);
+                        });
+                    }
+                });
+        });
+
+        // Carian Manual + Lihat Lagi
+        function cariResipi() {
+            const pertanyaan = document.getElementById('carian').value;
+            if(!pertanyaan) {
+                alert('Sila masukkan nama makanan.');
+                return;
+            }
+            const pautan = `https://www.themealdb.com/api/json/v1/1/search.php?s=${pertanyaan}`;
+
+            showLoading();
+            fetch(pautan)
+                .then(res => res.json())
+                .then(data => {
+                    hideLoading();
+                    const hasil = document.getElementById('hasil');
+                    const lihatLagi = document.getElementById('lihatLagiContainer');
+
+                    hasil.innerHTML = '';
+                    lihatLagi.innerHTML = '';
+
+                    if (data.meals) {
+                        currentData = data.meals;
+                        currentIndex = 0;
+                        paparkanResipi();
+                        buatButtonLihatLagi();
+                    } else {
+                        hasil.innerHTML = '<p>Maaf, tiada resipi ditemui.</p>';
+                    }
+                })
+                .catch(error => {
+                    hideLoading();
+                    console.error('Ralat:', error);
+                });
+        }
+
+        function paparkanResipi() {
+            const hasil = document.getElementById('hasil');
+            const seterusnya = currentData.slice(currentIndex, currentIndex + 3);
+
+            seterusnya.forEach(meal => {
+                const resipi = document.createElement('div');
+                resipi.className = 'resipi';
+                resipi.innerHTML = `
+                    <h3>${meal.strMeal}</h3>
+                    <img src="${meal.strMealThumb}" alt="${meal.strMeal}">
+                    <br><br>
+                    <a href="${meal.strYoutube}" target="_blank">▶️ Tonton Cara Masak</a>
+                `;
+                hasil.appendChild(resipi);
+            });
+
+            currentIndex += 3;
+
+            if (currentIndex >= currentData.length) {
+                document.getElementById('lihatLagiContainer').innerHTML = '';
+            }
+        }
+
+        function buatButtonLihatLagi() {
+            if (currentIndex < currentData.length) {
+                const lihatLagi = document.getElementById('lihatLagiContainer');
+                const button = document.createElement('button');
+                button.innerText = '➕ Lihat Lagi';
+                button.onclick = paparkanResipi;
+                lihatLagi.appendChild(button);
+            }
+        }
+
+        // Random Recipe
+        function randomResipi() {
+            const pautan = `https://www.themealdb.com/api/json/v1/1/random.php`;
+
+            showLoading();
+
+            fetch(pautan)
+                .then(res => res.json())
+                .then(data => {
+                    hideLoading();
+                    const hasil = document.getElementById('hasil');
+                    const lihatLagi = document.getElementById('lihatLagiContainer');
+                    hasil.innerHTML = '';
+                    lihatLagi.innerHTML = '';
+
+                    const meal = data.meals[0];
+                    const resipi = document.createElement('div');
+                    resipi.className = 'resipi';
+                    resipi.innerHTML = `
+                        <h3>${meal.strMeal}</h3>
+                        <img src="${meal.strMealThumb}" alt="${meal.strMeal}">
+                        <br><br>
+                        <a href="${meal.strYoutube}" target="_blank">▶️ Tonton Cara Masak</a>
+                    `;
+                    hasil.appendChild(resipi);
+                })
+                .catch(error => {
+                    hideLoading();
+                    console.error('Ralat:', error);
+                });
+        }
+    </script>
+
+</body>
+</html>
