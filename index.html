@@ -3,293 +3,631 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teroka Resipi</title>
+    <title>Recipe Finder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
-            --bg-color: #f9f9f9;
-            --text-color: #333;
-            --card-color: #fff;
-            --button-color: #28a745;
-            --link-color: #007bff;
+            --bg: #0d0d0d;
+            --bg2: #141414;
+            --bg3: #1a1a1a;
+            --surface: #1f1f1f;
+            --surface2: #272727;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --text: #f0ede8;
+            --text2: #9a9590;
+            --text3: #5c5a56;
+            --accent: #e8c97a;
+            --accent2: #c9a84c;
+            --accent-rgb: 232,201,122;
+            --red: #e07c60;
+            --green: #6bbf8e;
+            --font-display: 'Playfair Display', Georgia, serif;
+            --font-body: 'DM Sans', system-ui, sans-serif;
+            --radius: 14px;
+            --radius-sm: 8px;
+            --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
         }
 
-        [data-theme="dark"] {
-            --bg-color: #121212;
-            --text-color: #f9f9f9;
-            --card-color: #1e1e1e;
-            --button-color: #007bff;
-            --link-color: #00bfff;
+        [data-theme="light"] {
+            --bg: #faf8f4;
+            --bg2: #f4f1ec;
+            --bg3: #ede9e2;
+            --surface: #ffffff;
+            --surface2: #f9f6f0;
+            --border: rgba(0,0,0,0.07);
+            --border2: rgba(0,0,0,0.13);
+            --text: #1a1814;
+            --text2: #6b6660;
+            --text3: #b0aba4;
+            --accent: #c9890a;
+            --accent2: #a06d05;
+            --accent-rgb: 201,137,10;
         }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: Arial;
-            padding: 20px;
-            text-align: center;
-            transition: background-color 0.3s, color 0.3s;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            font-weight: 300;
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background var(--transition), color var(--transition);
         }
 
-        input {
-            padding: 10px;
-            width: 80%;
-            max-width: 300px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
+        /* ── NAV ── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 clamp(1.5rem, 5vw, 4rem);
+            height: 64px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
         }
 
-        input:focus {
-            outline: none;
-            border-color: var(--button-color);
-        }
-
-        button {
-            padding: 10px 15px;
-            border-radius: 8px;
-            background-color: var(--button-color);
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin: 5px;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-
-        button:hover {
-            opacity: 0.9;
-            transform: scale(1.05);
-        }
-
-        .resipi {
-            background: var(--card-color);
-            padding: 15px;
-            margin: 15px;
-            width: 300px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            display: inline-block;
-            vertical-align: top;
-            text-align: center;
-            transition: background-color 0.3s, transform 0.3s;
-        }
-
-        .resipi:hover {
-            transform: scale(1.03);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        img {
-            max-width: 100%;
-            border-radius: 10px;
-            transition: transform 0.3s;
-        }
-
-        img:hover {
-            transform: scale(1.05);
-        }
-
-        h2 {
-            margin-top: 50px;
-        }
-
-        a {
-            color: var(--link-color);
+        .nav-logo {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            letter-spacing: 0.02em;
+            color: var(--text);
             text-decoration: none;
         }
 
-        a:hover {
-            text-decoration: underline;
+        .nav-logo span { color: var(--accent); }
+
+        .nav-actions { display: flex; gap: 8px; }
+
+        .btn-ghost {
+            background: transparent;
+            border: 1px solid var(--border2);
+            color: var(--text2);
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            font-weight: 400;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 7px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all var(--transition);
         }
 
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: #1a1410;
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 7px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .btn-accent:hover {
+            background: var(--accent2);
+            border-color: var(--accent2);
+            transform: translateY(-1px);
+        }
+
+        /* ── HERO ── */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: clamp(5rem, 12vw, 9rem) clamp(1.5rem, 5vw, 4rem) clamp(4rem, 8vw, 6rem);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(var(--accent-rgb),0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-label {
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.8rem, 7vw, 5.5rem);
+            font-weight: 400;
+            line-height: 1.1;
+            letter-spacing: -0.01em;
+            color: var(--text);
+            max-width: 780px;
+            margin-bottom: 1.25rem;
+        }
+
+        .hero h1 em {
+            font-style: italic;
+            color: var(--accent);
+        }
+
+        .hero p {
+            font-size: 1rem;
+            color: var(--text2);
+            max-width: 440px;
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+        }
+
+        /* ── SEARCH BAR ── */
+        .search-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 560px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 50px;
+            padding: 6px 6px 6px 22px;
+            transition: border-color var(--transition), box-shadow var(--transition);
+        }
+
+        .search-wrap:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.12);
+        }
+
+        .search-wrap input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 300;
+            color: var(--text);
+        }
+
+        .search-wrap input::placeholder { color: var(--text3); }
+
+        .search-wrap button {
+            background: var(--accent);
+            border: none;
+            color: #1a1410;
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 9px 22px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .search-wrap button:hover {
+            background: var(--accent2);
+            transform: scale(1.03);
+        }
+
+        /* ── DIVIDER ── */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 0 clamp(1.5rem, 5vw, 4rem) 2.5rem;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text3);
+            white-space: nowrap;
+        }
+
+        /* ── SPINNER ── */
         .spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--button-color);
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--border2);
+            border-top-color: var(--accent);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
+            animation: spin 0.8s linear infinite;
+            margin: 3rem auto;
             display: none;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── GRID ── */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 0 clamp(1.5rem, 5vw, 4rem) 2rem;
         }
 
+        /* ── CARD ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+            transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+            animation: fadeUp 0.45s ease both;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border2);
+            box-shadow: 0 20px 48px rgba(0,0,0,0.35);
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-img-wrap {
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            background: var(--bg3);
+        }
+
+        .card-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        .card:hover .card-img-wrap img { transform: scale(1.06); }
+
+        .card-body {
+            padding: 1.1rem 1.25rem 1.25rem;
+        }
+
+        .card-category {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.45rem;
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            font-weight: 400;
+            color: var(--text);
+            line-height: 1.3;
+            margin-bottom: 1rem;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .watch-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text2);
+            text-decoration: none;
+            transition: color var(--transition);
+        }
+
+        .watch-link:hover { color: var(--accent); }
+
+        .watch-link svg {
+            width: 14px;
+            height: 14px;
+            transition: transform var(--transition);
+        }
+
+        .watch-link:hover svg { transform: translate(2px, -2px); }
+
+        /* ── LOAD MORE ── */
+        .load-more-wrap {
+            text-align: center;
+            padding: 1.5rem 0 2.5rem;
+        }
+
+        .btn-load {
+            background: transparent;
+            border: 1px solid var(--border2);
+            color: var(--text2);
+            font-family: var(--font-body);
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 12px 32px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .btn-load:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        /* ── POPULAR CHIPS ── */
+        .popular-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 clamp(1.5rem, 5vw, 4rem) 3rem;
+            justify-content: center;
+        }
+
+        .chip {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            font-family: var(--font-body);
+            font-size: 0.82rem;
+            font-weight: 400;
+            padding: 6px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .chip:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(var(--accent-rgb),0.05);
+        }
+
+        /* ── EMPTY / ERROR ── */
+        .empty {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text3);
+        }
+
+        .empty p { font-size: 0.95rem; }
+
+        /* ── SECTION ── */
+        .section { padding-top: 3.5rem; }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem clamp(1.5rem, 5vw, 4rem);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        footer p {
+            font-size: 0.78rem;
+            color: var(--text3);
+        }
+
+        /* ── RESPONSIVE ── */
         @media (max-width: 600px) {
-            .resipi {
-                width: 90%;
-            }
+            .grid { grid-template-columns: 1fr; }
+            nav { padding: 0 1.25rem; }
+            .hero { padding: 4rem 1.25rem 3rem; }
+            .section-divider { margin-inline: 1.25rem; }
+            .grid { padding-inline: 1.25rem; }
+            .popular-chips { padding-inline: 1.25rem; }
         }
     </style>
 </head>
 <body>
 
-    <h1>🍳 Teroka Resipi</h1>
+<!-- NAV -->
+<nav>
+    <a class="nav-logo" href="#">Recipe<span>.</span></a>
+    <div class="nav-actions">
+        <button class="btn-ghost" onclick="randomResipi()">✦ Random</button>
+        <button class="btn-ghost" onclick="toggleTheme()">⏾ Theme</button>
+    </div>
+</nav>
 
-    <button onclick="toggleTheme()">🌗 Tukar Tema</button>
-    <button onclick="randomResipi()">🎲 Random Recipe</button>
+<!-- HERO -->
+<section class="hero">
+    <p class="hero-label">✦ Discover · Cook · Enjoy</p>
+    <h1>Find your next<br><em>favourite dish</em></h1>
+    <p>Search thousands of recipes from around the world. From quick weeknight dinners to weekend feasts.</p>
 
-    <!-- Search Section -->
-    <h2>🔍 Cari Resipi Anda</h2>
-    <input type="text" id="carian" placeholder="Nak masak apa hari ini?">
-    <button onclick="cariResipi()">Cari</button>
+    <div class="search-wrap">
+        <input type="text" id="carian" placeholder="Chicken, pasta, nasi lemak…" onkeydown="if(event.key==='Enter') cariResipi()">
+        <button onclick="cariResipi()">Search</button>
+    </div>
+</section>
 
-    <div class="spinner" id="loading"></div>
-    <div id="hasil"></div>
-    <div id="lihatLagiContainer"></div>
+<!-- RESULTS -->
+<div class="spinner" id="loading"></div>
+<div id="hasil" class="grid"></div>
+<div id="lihatLagiContainer" class="load-more-wrap"></div>
 
-    <!-- Carian Popular -->
-    <h2>🔥 Carian Popular Hari Ini</h2>
-    <div id="popular"></div>
+<!-- POPULAR -->
+<section class="section">
+    <div class="section-divider">
+        <span class="section-label">Trending today</span>
+    </div>
+    <div class="popular-chips" id="popular-chips"></div>
+    <div id="popular" class="grid"></div>
+</section>
 
-    <script>
-        let currentIndex = 0;
-        let currentData = [];
+<footer>
+    <p>Recipe data from <a href="https://www.themealdb.com" target="_blank" style="color:var(--text2); text-decoration:underline;">TheMealDB</a></p>
+    <p>Recipe Finder © 2025</p>
+</footer>
 
-        // Theme Toggle
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute("data-theme");
-            const newTheme = currentTheme === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-theme", newTheme);
+<script>
+    let currentIndex = 0;
+    let currentData = [];
+
+    function toggleTheme() {
+        const cur = document.documentElement.getAttribute('data-theme');
+        document.documentElement.setAttribute('data-theme', cur === 'light' ? 'dark' : 'light');
+    }
+
+    function showLoading() { document.getElementById('loading').style.display = 'block'; }
+    function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+
+    function makeCard(meal, delay = 0) {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.style.animationDelay = delay + 'ms';
+        const yt = meal.strYoutube || '#';
+        const area = meal.strArea || '';
+        div.innerHTML = `
+            <div class="card-img-wrap">
+                <img src="${meal.strMealThumb}" alt="${meal.strMeal}" loading="lazy">
+            </div>
+            <div class="card-body">
+                ${area ? `<span class="card-category">${area} cuisine</span>` : ''}
+                <h3 class="card-title">${meal.strMeal}</h3>
+                <div class="card-footer">
+                    <a class="watch-link" href="${yt}" target="_blank">
+                        Watch recipe
+                        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M3 13L13 3M13 3H7M13 3v6"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>`;
+        return div;
+    }
+
+    function cariResipi() {
+        const q = document.getElementById('carian').value.trim();
+        if (!q) return;
+        showLoading();
+        document.getElementById('hasil').innerHTML = '';
+        document.getElementById('lihatLagiContainer').innerHTML = '';
+        fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(q)}`)
+            .then(r => r.json())
+            .then(data => {
+                hideLoading();
+                const hasil = document.getElementById('hasil');
+                if (data.meals) {
+                    currentData = data.meals;
+                    currentIndex = 0;
+                    paparkanResipi();
+                    document.getElementById('hasil').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    hasil.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>No recipes found for "<strong>' + q + '</strong>"</p></div>';
+                }
+            })
+            .catch(() => hideLoading());
+    }
+
+    function paparkanResipi() {
+        const hasil = document.getElementById('hasil');
+        const batch = currentData.slice(currentIndex, currentIndex + 6);
+        batch.forEach((meal, i) => hasil.appendChild(makeCard(meal, i * 60)));
+        currentIndex += 6;
+        const btn = document.getElementById('lihatLagiContainer');
+        btn.innerHTML = '';
+        if (currentIndex < currentData.length) {
+            const b = document.createElement('button');
+            b.className = 'btn-load';
+            b.textContent = 'Load more';
+            b.onclick = paparkanResipi;
+            btn.appendChild(b);
         }
+    }
 
-        // Loading Animation
-        function showLoading() {
-            document.getElementById('loading').style.display = 'block';
-        }
-        function hideLoading() {
-            document.getElementById('loading').style.display = 'none';
-        }
+    function randomResipi() {
+        showLoading();
+        document.getElementById('hasil').innerHTML = '';
+        document.getElementById('lihatLagiContainer').innerHTML = '';
+        fetch('https://www.themealdb.com/api/json/v1/1/random.php')
+            .then(r => r.json())
+            .then(data => {
+                hideLoading();
+                const hasil = document.getElementById('hasil');
+                hasil.appendChild(makeCard(data.meals[0]));
+                hasil.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            })
+            .catch(() => hideLoading());
+    }
 
-        // Carian Popular
-        const popularList = ['Nasi lemak', 'Cheesecake', 'Fried rice', 'Burger', 'Chicken curry'];
+    // Popular chips + cards
+    const popularTerms = ['Nasi lemak', 'Cheesecake', 'Fried rice', 'Burger', 'Chicken curry'];
+    const chips = document.getElementById('popular-chips');
+    popularTerms.forEach(term => {
+        const c = document.createElement('span');
+        c.className = 'chip';
+        c.textContent = term;
+        c.onclick = () => {
+            document.getElementById('carian').value = term;
+            cariResipi();
+        };
+        chips.appendChild(c);
+    });
 
-        popularList.forEach(makanan => {
-            const pautan = `https://www.themealdb.com/api/json/v1/1/search.php?s=${makanan}`;
-
-            fetch(pautan)
-                .then(res => res.json())
-                .then(data => {
-                    const popular = document.getElementById('popular');
-
-                    if (data.meals) {
-                        const limit = data.meals.slice(0, 2);
-                        limit.forEach(meal => {
-                            const resipi = document.createElement('div');
-                            resipi.className = 'resipi';
-                            resipi.innerHTML = `
-                                <h3>${meal.strMeal}</h3>
-                                <img src="${meal.strMealThumb}" alt="${meal.strMeal}">
-                                <br><br>
-                                <a href="${meal.strYoutube}" target="_blank">▶️ Tonton Cara Masak</a>
-                            `;
-                            popular.appendChild(resipi);
-                        });
-                    }
-                });
-        });
-
-        // Carian Manual + Lihat Lagi
-        function cariResipi() {
-            const pertanyaan = document.getElementById('carian').value;
-            if(!pertanyaan) {
-                alert('Sila masukkan nama makanan.');
-                return;
-            }
-            const pautan = `https://www.themealdb.com/api/json/v1/1/search.php?s=${pertanyaan}`;
-
-            showLoading();
-            fetch(pautan)
-                .then(res => res.json())
-                .then(data => {
-                    hideLoading();
-                    const hasil = document.getElementById('hasil');
-                    const lihatLagi = document.getElementById('lihatLagiContainer');
-
-                    hasil.innerHTML = '';
-                    lihatLagi.innerHTML = '';
-
-                    if (data.meals) {
-                        currentData = data.meals;
-                        currentIndex = 0;
-                        paparkanResipi();
-                        buatButtonLihatLagi();
-                    } else {
-                        hasil.innerHTML = '<p>Maaf, tiada resipi ditemui.</p>';
-                    }
-                })
-                .catch(error => {
-                    hideLoading();
-                    console.error('Ralat:', error);
-                });
-        }
-
-        function paparkanResipi() {
-            const hasil = document.getElementById('hasil');
-            const seterusnya = currentData.slice(currentIndex, currentIndex + 3);
-
-            seterusnya.forEach(meal => {
-                const resipi = document.createElement('div');
-                resipi.className = 'resipi';
-                resipi.innerHTML = `
-                    <h3>${meal.strMeal}</h3>
-                    <img src="${meal.strMealThumb}" alt="${meal.strMeal}">
-                    <br><br>
-                    <a href="${meal.strYoutube}" target="_blank">▶️ Tonton Cara Masak</a>
-                `;
-                hasil.appendChild(resipi);
+    const popularGrid = document.getElementById('popular');
+    popularTerms.forEach((term, ti) => {
+        fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${encodeURIComponent(term)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.meals) {
+                    data.meals.slice(0, 2).forEach((meal, i) => {
+                        const card = makeCard(meal, (ti * 2 + i) * 60);
+                        popularGrid.appendChild(card);
+                    });
+                }
             });
-
-            currentIndex += 3;
-
-            if (currentIndex >= currentData.length) {
-                document.getElementById('lihatLagiContainer').innerHTML = '';
-            }
-        }
-
-        function buatButtonLihatLagi() {
-            if (currentIndex < currentData.length) {
-                const lihatLagi = document.getElementById('lihatLagiContainer');
-                const button = document.createElement('button');
-                button.innerText = '➕ Lihat Lagi';
-                button.onclick = paparkanResipi;
-                lihatLagi.appendChild(button);
-            }
-        }
-
-        // Random Recipe
-        function randomResipi() {
-            const pautan = `https://www.themealdb.com/api/json/v1/1/random.php`;
-
-            showLoading();
-
-            fetch(pautan)
-                .then(res => res.json())
-                .then(data => {
-                    hideLoading();
-                    const hasil = document.getElementById('hasil');
-                    const lihatLagi = document.getElementById('lihatLagiContainer');
-                    hasil.innerHTML = '';
-                    lihatLagi.innerHTML = '';
-
-                    const meal = data.meals[0];
-                    const resipi = document.createElement('div');
-                    resipi.className = 'resipi';
-                    resipi.innerHTML = `
-                        <h3>${meal.strMeal}</h3>
-                        <img src="${meal.strMealThumb}" alt="${meal.strMeal}">
-                        <br><br>
-                        <a href="${meal.strYoutube}" target="_blank">▶️ Tonton Cara Masak</a>
-                    `;
-                    hasil.appendChild(resipi);
-                })
-                .catch(error => {
-                    hideLoading();
-                    console.error('Ralat:', error);
-                });
-        }
-    </script>
-
+    });
+</script>
 </body>
 </html>
